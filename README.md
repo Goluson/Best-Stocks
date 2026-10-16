@@ -1,6 +1,6 @@
 # BestStocks AI — Institutional Stock Screener & Live Index Analysis
 
-An institutional-grade stock screener built for Indian equity markets (NSE & BSE). It evaluates companies against **11 strict fundamental criteria** (Sales Growth, ROE, FCF, ROIC, PEG, low leverage, etc.) across major market indices.
+An institutional-grade stock screener built for Indian equity markets (NSE & BSE). It evaluates companies against **11 strict fundamental criteria** (Sales Growth, ROE, FCF, ROIC, PEG, low leverage, etc.) across 22 major market and sectoral indices.
 
 ![BestStocks Preview](https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&auto=format&fit=crop&q=80)
 
@@ -8,31 +8,38 @@ An institutional-grade stock screener built for Indian equity markets (NSE & BSE
 
 ## 🌟 Key Features
 
-1. **Rule-Based Screening Engine (11 Strict Criteria)**:
-   - **Sales Growth (3-5 Years)**: `> 15% - 30%`
-   - **Net Profit Growth (3 Years)**: `> 15%`
-   - **PEG Ratio**: `< 1.5`
-   - **Return on Equity (ROE)**: `> 15% - 20%+`
-   - **Debt to Equity (D/E)**: `< 0.5` (or industry norm)
-   - **Free Cash Flow (FCF)**: Positive & Growing
-   - **ROIC**: `> 15%`
-   - **FCF Conversion Ratio**: `> 80%`
-   - **ROIC vs. WACC Spread**: `> 5%`
-   - **Interest Coverage Ratio**: `> 5x`
-   - **3-Year Revenue CAGR**: `> 10%`
+### 1. 22 Indian Market & Sectoral Indices
+Organized into clean, uncluttered categories:
+- **Broad Market**: `NIFTY 50`, `SENSEX`, `NIFTY 100`, `BSE 100`, `ALL NIFTY`
+- **Banking & Finance**: `BANK NIFTY`, `NIFTY PRIVATE BANK`, `NIFTY PSU BANK`, `BANKEX`, `FIN NIFTY`
+- **Sectoral**: `NIFTY AUTO`, `NIFTY FMCG`, `NIFTY METAL`, `NIFTY REALTY`, `NIFTY COMMODITIES`, `NIFTY IT`, `NIFTY PHARMA`
+- **Mid & Small Cap**: `NIFTY MID CAP SELECT`, `NIFTY MID CAP 150`, `NIFTY SMALL CAP`, `BSE MID CAP`, `BSE SMALL CAP`
 
-2. **Index Screening & Dynamic Empty State**:
-   - Filter by major indices: `NIFTY 50`, `SENSEX`, `NIFTY 100`, `BANK NIFTY`, `ALL NIFTY`, `NIFTY PHARMA`, `NIFTY IT`, `BSE 100`, `BSE MID CAP`, `BSE SMALL CAP`.
-   - When no stocks in an index fulfill all 11 conditions (e.g. `BANK NIFTY`), the system intelligently prompts the user to enter or select alternative indices with one-click recommendations.
+### 2. Rule-Based Screening Engine (11 Strict Criteria)
+1. **Sales Growth (3-5 Years)**: `> 15% - 30%`
+2. **Net Profit Growth (3 Years)**: `> 15%`
+3. **PEG Ratio**: `< 1.5`
+4. **Return on Equity (ROE)**: `> 15% - 20%+`
+5. **Debt to Equity (D/E)**: `< 0.5` (or industry norm)
+6. **Free Cash Flow (FCF)**: Positive & Growing (`FCF > 0`, `YoY > 0%`)
+7. **ROIC**: `> 15%`
+8. **FCF Conversion Ratio**: `> 80%` (FCF / Net Profit)
+9. **ROIC vs. WACC Spread**: `> 5%`
+10. **Interest Coverage Ratio**: `> 5x`
+11. **3-Year Revenue CAGR**: `> 10%`
 
-3. **Live Stock Price Search & Streaming**:
-   - Global search in navbar with instant autocomplete.
-   - Shows live price ticking and daily fluctuations.
-   - Deep-dive stock modal with 11-criteria scorecard table and 5-year financials.
+### 3. Investment Verdict & Analysis on Any Listed Stock
+- Search across all listed Indian stocks in the top navbar.
+- Real-time live prices with instant quality badges in autocomplete.
+- Click any stock to open the **AI & Fundamental Investment Verdict**:
+  - 🟢 **BEST FOR INVESTING**: 11/11 criteria met, high compounding quality.
+  - 🟡 **GOOD CANDIDATE / MONITOR**: 9–10 criteria met, highlighting specific bottlenecks.
+  - 🔴 **NOT RECOMMENDED**: Fails core solvency or profitability benchmarks.
+  - Detailed breakdown of **Key Strengths**, **Risks**, **11-Point Scorecard Table**, and **5-Year Revenue & FCF Charts**.
 
-4. **Simple Sign In & Watchlist**:
-   - One-click Guest/Demo Investor login or email login.
-   - Persistent watchlist.
+### 4. Simple Sign In & Watchlist
+- One-click Guest/Demo Investor login or email login.
+- Persistent watchlist tracking.
 
 ---
 

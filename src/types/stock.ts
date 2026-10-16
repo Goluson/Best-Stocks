@@ -8,7 +8,29 @@ export type StockIndex =
   | 'NIFTY IT'
   | 'BSE 100'
   | 'BSE MID CAP'
-  | 'BSE SMALL CAP';
+  | 'BSE SMALL CAP'
+  // Newly Added Indices
+  | 'NIFTY METAL'
+  | 'NIFTY PRIVATE BANK'
+  | 'BANKEX'
+  | 'NIFTY MID CAP SELECT'
+  | 'NIFTY MID CAP 150'
+  | 'NIFTY SMALL CAP'
+  | 'FIN NIFTY'
+  | 'NIFTY AUTO'
+  | 'NIFTY FMCG'
+  | 'NIFTY PSU BANK'
+  | 'NIFTY REALTY'
+  | 'NIFTY COMMODITIES';
+
+export type IndexCategory = 'Broad Market' | 'Banking & Finance' | 'Sectoral' | 'Mid & Small Cap';
+
+export interface IndexMeta {
+  name: StockIndex;
+  category: IndexCategory;
+  description: string;
+  countHint: string;
+}
 
 export interface ScreenerCriteria {
   salesGrowthMin: number; // e.g. 15%
@@ -53,20 +75,20 @@ export interface Stock {
   sparkline: number[];
   
   // 11 Core Best Stocks Screener Criteria
-  salesGrowth3to5Yr: number; // e.g. 21.5%
-  netProfitGrowth3Yr: number; // e.g. 24.2%
-  pegRatio: number; // e.g. 1.15
-  roe: number; // e.g. 28.4%
-  debtToEquity: number; // e.g. 0.08
-  fcfPositive: boolean; // e.g. true
-  fcfGrowth: number; // e.g. 18.2%
-  fcfAmountCr: number; // e.g. 14500
-  roic: number; // e.g. 26.5%
-  wacc: number; // e.g. 10.5%
-  roicWaccSpread: number; // e.g. 16.0% (ROIC - WACC)
-  fcfConversionRatio: number; // e.g. 88.5% (FCF / Net Profit)
-  interestCoverage: number; // e.g. 24.5x
-  revenueCAGR3Yr: number; // e.g. 16.8%
+  salesGrowth3to5Yr: number;
+  netProfitGrowth3Yr: number;
+  pegRatio: number;
+  roe: number;
+  debtToEquity: number;
+  fcfPositive: boolean;
+  fcfGrowth: number;
+  fcfAmountCr: number;
+  roic: number;
+  wacc: number;
+  roicWaccSpread: number;
+  fcfConversionRatio: number;
+  interestCoverage: number;
+  revenueCAGR3Yr: number;
 
   // Deep dive & presentation
   financialHistory: StockFinancialYear[];
@@ -84,19 +106,31 @@ export interface CriteriaResult {
   value: number | boolean;
 }
 
+export type VerdictStatus = 'BEST_FOR_INVESTING' | 'POTENTIAL_MONITOR' | 'NOT_RECOMMENDED';
+
+export interface InvestmentVerdict {
+  status: VerdictStatus;
+  badgeText: string;
+  title: string;
+  summary: string;
+  keyStrengths: string[];
+  keyRisks: string[];
+}
+
 export interface EvaluationResult {
   stock: Stock;
   meetsAll: boolean;
-  score: number; // e.g. 11
-  totalCriteria: number; // e.g. 11
+  score: number;
+  totalCriteria: number;
   scorePercent: number;
   criteriaResults: CriteriaResult[];
   failedCriteria: CriteriaResult[];
+  verdict: InvestmentVerdict;
 }
 
 export interface UserProfile {
   name: string;
   email: string;
   avatar: string;
-  watchlist: string[]; // stock symbols
+  watchlist: string[];
 }

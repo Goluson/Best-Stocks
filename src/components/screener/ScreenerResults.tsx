@@ -1,17 +1,14 @@
 import React from 'react';
 import { useStockStore } from '../../store/useStockStore';
 import StockCard from './StockCard';
-import { POPULAR_INDICES } from '../../data/stocksData';
+import { ALL_INDICES_META } from '../../data/stocksData';
 import { StockIndex } from '../../types/stock';
 import { 
   Sparkles, 
   AlertTriangle, 
   ArrowRight, 
-  CheckCircle2, 
   SlidersHorizontal,
-  Compass,
-  TrendingUp,
-  HelpCircle
+  Compass
 } from 'lucide-react';
 
 export default function ScreenerResults() {
@@ -26,11 +23,12 @@ export default function ScreenerResults() {
   const { qualifyingStocks, nearMissStocks, totalInIndex } = getEvaluationsForIndex(selectedIndex);
 
   // Check alternative indices that DO have qualifying stocks
-  const alternativeIndices = POPULAR_INDICES.map(idx => {
+  const alternativeIndices = ALL_INDICES_META.map(idx => {
     const evalData = getEvaluationsForIndex(idx.name);
     return {
       name: idx.name,
       count: evalData.qualifyingStocks.length,
+      category: idx.category,
     };
   }).filter(item => item.name !== selectedIndex && item.count > 0);
 
@@ -95,7 +93,7 @@ export default function ScreenerResults() {
               Please Enter or Select Any Other Indices:
             </h4>
             <div className="flex flex-wrap gap-2">
-              {alternativeIndices.map((alt) => (
+              {alternativeIndices.slice(0, 8).map((alt) => (
                 <button
                   key={alt.name}
                   onClick={() => setSelectedIndex(alt.name)}
