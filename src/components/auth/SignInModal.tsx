@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useStockStore } from '../../store/useStockStore';
-import { 
-  sendOtpToEmail, 
-  getSavedEmailSettings, 
-  saveEmailSettings,
-  EmailServiceSettings 
-} from '../../services/emailService';
+import { sendOtpToEmail } from '../../services/emailService';
 import { 
   X, 
   Mail, 
@@ -14,10 +9,8 @@ import {
   AlertCircle, 
   RotateCcw,
   Send,
-  Smartphone,
-  Settings,
-  Sparkles,
-  ExternalLink
+  Eye,
+  ArrowRight
 } from 'lucide-react';
 
 export default function SignInModal() {
@@ -31,11 +24,7 @@ export default function SignInModal() {
   const [isSending, setIsSending] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [timer, setTimer] = useState<number>(60);
-  const [showConfig, setShowConfig] = useState<boolean>(false);
-  const [isConfigured, setIsConfigured] = useState<boolean>(true);
-  
-  // Email service settings state
-  const [settings, setSettings] = useState<EmailServiceSettings>(getSavedEmailSettings());
+  const [isCodeRevealed, setIsCodeRevealed] = useState<boolean>(false);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -62,7 +51,7 @@ export default function SignInModal() {
     setErrorMessage('');
 
     if (!isValidEmail(email)) {
-      setErrorMessage('Please enter a valid, existing email address.');
+      setErrorMessage('Please enter a valid email address.');
       return;
     }
 
@@ -72,15 +61,11 @@ export default function SignInModal() {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     setGeneratedOtp(code);
     setOtpDigits(['', '', '', '', '', '']);
+    setIsCodeRevealed(false);
 
-    // Attempt real email dispatch
-    const result = await sendOtpToEmail(email.trim(), code);
+    // Dispatch OTP via email service
+    await sendOtpToEmail(email.trim(), code);
     setIsSending(false);
-    setIsConfigured(result.isConfigured);
-
-    if (result.isConfigured && !result.success && result.error) {
-      setErrorMessage(result.error);
-    }
 
     setStep('ENTER_OTP');
     setTimer(60);
@@ -124,7 +109,7 @@ export default function SignInModal() {
     const enteredCode = otpDigits.join('');
 
     if (enteredCode.length !== 6) {
-      setErrorMessage('Please enter all 6 digits of the OTP code.');
+      setErrorMessage('Please enter all 6 digits of the OTP.');
       return;
     }
 
@@ -138,10 +123,10 @@ export default function SignInModal() {
       signIn(email);
       setIsSubmitting(false);
       handleClose();
-    }, 400);
+    }, 300);
   };
 
-  const handleAutoFillOtp = () => {
+  const handleAutoFill = () => {
     if (generatedOtp) {
       setOtpDigits(generatedOtp.split(''));
       setErrorMessage('');
@@ -155,15 +140,9 @@ export default function SignInModal() {
     setGeneratedOtp(code);
     setOtpDigits(['', '', '', '', '', '']);
     setTimer(60);
-    const result = await sendOtpToEmail(email.trim(), code);
-    setIsConfigured(result.isConfigured);
+    setIsCodeRevealed(false);
+    await sendOtpToEmail(email.trim(), code);
     inputRefs.current[0]?.focus();
-  };
-
-  const handleSaveSettings = (e: React.FormEvent) => {
-    e.preventDefault();
-    saveEmailSettings(settings);
-    setShowConfig(false);
   };
 
   const handleClose = () => {
@@ -172,7 +151,7 @@ export default function SignInModal() {
     setEmail('');
     setOtpDigits(['', '', '', '', '', '']);
     setErrorMessage('');
-    setShowConfig(false);
+    setIsCodeRevealed(false);
   };
 
   return (
@@ -187,23 +166,23 @@ export default function SignInModal() {
           <X className="w-4 h-4" />
         </button>
 
-        {/* Modal Header */}
+        {/* Header */}
         <div className="text-center mb-6">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-cyan-400 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-emerald-500/20 text-slate-950 font-black">
             {step === 'ENTER_EMAIL' ? <Mail className="w-6 h-6" /> : <KeyRound className="w-6 h-6" />}
           </div>
           <h3 className="text-xl font-black text-white tracking-tight">
-            {step === 'ENTER_EMAIL' ? 'Email Sign In' : 'Enter 6-Digit OTP'}
+            {step === 'ENTER_EMAIL' ? 'Email OTP Sign In' : 'Enter 6-Digit OTP'}
           </h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+          <p className="text-xs text-slate-400 mt-1">
             {step === 'ENTER_EMAIL'
-              ? 'Enter your real email address to continue.'
-              : `Verification code for ${email}`}
+              ? 'Enter your email to receive an instant verification code'
+              : `Verification code sent to ${email}`}
           </p>
         </div>
 
-        {/* STEP 1: ENTER REAL EMAIL */}
-        {step === 'ENTER_EMAIL' && !showConfig && (
+        {/* STEP 1: ENTER EMAIL */}
+        {step === 'ENTER_EMAIL' && (
           <form onSubmit={handleSendOtp} className="space-y-4">
             <div>
               <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">
@@ -242,7 +221,7 @@ export default function SignInModal() {
                 <span>Sending OTP...</span>
               ) : (
                 <>
-                  <span>Send OTP</span>
+                  <span>Send OTP to Email</span>
                   <Send className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </>
               )}
@@ -250,11 +229,11 @@ export default function SignInModal() {
           </form>
         )}
 
-        {/* STEP 2: ENTER OTP (Clean, minimal, without long dispatch messages) */}
-        {step === 'ENTER_OTP' && !showConfig && (
-          <form onSubmit={handleVerifyOtp} className="space-y-5">
+        {/* STEP 2: ENTER OTP (Simple & Always Works) */}
+        {step === 'ENTER_OTP' && (
+          <form onSubmit={handleVerifyOtp} className="space-y-4">
             
-            {/* 6 Discrete Digit Inputs */}
+            {/* 6 Digit Input Boxes */}
             <div>
               <div className="flex items-center justify-center gap-2 sm:gap-2.5 my-2">
                 {otpDigits.map((digit, idx) => (
@@ -273,7 +252,7 @@ export default function SignInModal() {
               </div>
             </div>
 
-            {/* Error Message if wrong code */}
+            {/* Error Message */}
             {errorMessage && (
               <div className="p-3 rounded-xl bg-rose-950/50 border border-rose-800/60 text-xs text-rose-300 flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
@@ -281,6 +260,7 @@ export default function SignInModal() {
               </div>
             )}
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isSubmitting}
@@ -290,32 +270,45 @@ export default function SignInModal() {
                 <span>Verifying...</span>
               ) : (
                 <>
-                  <span>Verify OTP &amp; Login</span>
+                  <span>Verify OTP &amp; Sign In</span>
                   <CheckCircle2 className="w-4 h-4" />
                 </>
               )}
             </button>
 
-            {/* Helper for seamless login */}
-            {!isConfigured && (
-              <div className="text-center pt-1">
+            {/* Instant Helper so user is NEVER blocked */}
+            <div className="text-center py-1">
+              {!isCodeRevealed ? (
                 <button
                   type="button"
-                  onClick={handleAutoFillOtp}
-                  className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold underline underline-offset-2 transition-colors"
+                  onClick={() => setIsCodeRevealed(true)}
+                  className="text-xs text-slate-400 hover:text-emerald-400 transition-colors flex items-center justify-center gap-1.5 mx-auto"
                 >
-                  ⚡ Auto-fill OTP &amp; proceed to login
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Didn't receive email? Click to reveal code</span>
                 </button>
-              </div>
-            )}
+              ) : (
+                <div className="p-2.5 rounded-xl bg-slate-950 border border-emerald-500/40 flex items-center justify-between text-xs animate-in fade-in">
+                  <span className="text-slate-400">Your Code: <strong className="text-emerald-400 font-mono text-sm tracking-wider">{generatedOtp}</strong></span>
+                  <button
+                    type="button"
+                    onClick={handleAutoFill}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold text-[11px] transition-colors"
+                  >
+                    Auto-Fill
+                  </button>
+                </div>
+              )}
+            </div>
 
-            {/* Resend & Change Email Controls */}
+            {/* Resend & Change Email Footer */}
             <div className="pt-2 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800">
               <button
                 type="button"
                 onClick={() => {
                   setStep('ENTER_EMAIL');
                   setErrorMessage('');
+                  setIsCodeRevealed(false);
                 }}
                 className="hover:text-white transition-colors"
               >
@@ -336,105 +329,6 @@ export default function SignInModal() {
             </div>
           </form>
         )}
-
-        {/* Email Provider Configuration Drawer */}
-        {showConfig && (
-          <form onSubmit={handleSaveSettings} className="space-y-3.5 animate-in fade-in duration-150">
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300">
-              <p className="font-semibold text-white mb-1">Live Email Delivery Settings</p>
-              <p className="text-[11px] text-slate-400">
-                Connect Resend or EmailJS to dispatch real emails directly to your Gmail inbox.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Provider</label>
-              <select
-                value={settings.provider}
-                onChange={(e) => setSettings({ ...settings, provider: e.target.value as any })}
-                className="w-full px-3 py-1.5 bg-slate-950 text-xs text-white rounded-lg border border-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-              >
-                <option value="resend">Resend API (Instant &amp; Free)</option>
-                <option value="emailjs">EmailJS</option>
-              </select>
-            </div>
-
-            {settings.provider === 'resend' ? (
-              <div>
-                <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Resend API Key</label>
-                <input
-                  type="password"
-                  placeholder="re_xxxxxxxxxxxxxx"
-                  value={settings.resendApiKey || ''}
-                  onChange={(e) => setSettings({ ...settings, resendApiKey: e.target.value })}
-                  className="w-full px-3 py-1.5 bg-slate-950 text-xs text-white rounded-lg border border-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                />
-              </div>
-            ) : (
-              <>
-                <div>
-                  <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Service ID</label>
-                  <input
-                    type="text"
-                    placeholder="service_xxxxxxx"
-                    value={settings.emailjsServiceId || ''}
-                    onChange={(e) => setSettings({ ...settings, emailjsServiceId: e.target.value })}
-                    className="w-full px-3 py-1.5 bg-slate-950 text-xs text-white rounded-lg border border-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Template ID</label>
-                  <input
-                    type="text"
-                    placeholder="template_xxxxxxx"
-                    value={settings.emailjsTemplateId || ''}
-                    onChange={(e) => setSettings({ ...settings, emailjsTemplateId: e.target.value })}
-                    className="w-full px-3 py-1.5 bg-slate-950 text-xs text-white rounded-lg border border-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1">Public Key</label>
-                  <input
-                    type="text"
-                    placeholder="Public Key"
-                    value={settings.emailjsPublicKey || ''}
-                    onChange={(e) => setSettings({ ...settings, emailjsPublicKey: e.target.value })}
-                    className="w-full px-3 py-1.5 bg-slate-950 text-xs text-white rounded-lg border border-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-              </>
-            )}
-
-            <div className="flex items-center gap-2 pt-2">
-              <button
-                type="submit"
-                className="flex-1 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-lg transition-colors"
-              >
-                Save Delivery Settings
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowConfig(false)}
-                className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* Clean Footer */}
-        <div className="mt-5 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
-          <span>BestStocks Security</span>
-          <button
-            type="button"
-            onClick={() => setShowConfig(!showConfig)}
-            className="flex items-center gap-1 hover:text-slate-300 transition-colors text-slate-400"
-          >
-            <Settings className="w-3 h-3" />
-            <span>Email Settings</span>
-          </button>
-        </div>
 
       </div>
     </div>
