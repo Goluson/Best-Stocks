@@ -36,6 +36,17 @@ interface StockStore {
   };
 }
 
+// Load initial user from localStorage if exists
+function getInitialUser(): UserProfile | null {
+  try {
+    const saved = localStorage.getItem('beststocks_user');
+    if (saved) return JSON.parse(saved);
+  } catch (e) {
+    // Ignore localStorage access errors
+  }
+  return null;
+}
+
 export const useStockStore = create<StockStore>((set, get) => ({
   stocks: ALL_STOCKS,
   selectedIndex: 'NIFTY 50',
@@ -44,12 +55,7 @@ export const useStockStore = create<StockStore>((set, get) => ({
   criteria: DEFAULT_CRITERIA,
   isCriteriaDrawerOpen: false,
   isSignInModalOpen: false,
-  currentUser: {
-    name: 'Investor Shail',
-    email: 'investor@beststocks.ai',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
-    watchlist: ['TCS', 'TITAN', 'CDSL'],
-  },
+  currentUser: getInitialUser(),
   marketStatus: 'OPEN',
   lastTickTime: new Date().toLocaleTimeString(),
 
@@ -68,18 +74,35 @@ export const useStockStore = create<StockStore>((set, get) => ({
   setIsSignInModalOpen: (isOpen) => set({ isSignInModalOpen: isOpen }),
 
   signIn: (email, name) => {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name?.trim() || cleanEmail.split('@')[0];
+    const newUser: UserProfile = {
+      name: cleanName.charAt(0).toUpperCase() + cleanName.slice(1),
+      email: cleanEmail,
+      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(cleanName)}&backgroundColor=0284c7,059669,7c3aed`,
+      watchlist: ['TCS', 'TITAN', 'POLYCAB'],
+    };
+
+    try {
+      localStorage.setItem('beststocks_user', JSON.stringify(newUser));
+    } catch (e) {
+      // Ignore localStorage access errors
+    }
+
     set({
-      currentUser: {
-        name: name || email.split('@')[0],
-        email,
-        avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(email)}`,
-        watchlist: ['TCS', 'TITAN'],
-      },
+      currentUser: newUser,
       isSignInModalOpen: false,
     });
   },
 
-  signOut: () => set({ currentUser: null }),
+  signOut: () => {
+    try {
+      localStorage.removeItem('beststocks_user');
+    } catch (e) {
+      // Ignore
+    }
+    set({ currentUser: null });
+  },
 
   toggleWatchlist: (symbol) => {
     const user = get().currentUser;
@@ -92,7 +115,14 @@ export const useStockStore = create<StockStore>((set, get) => ({
       ? user.watchlist.filter((s) => s !== symbol)
       : [...user.watchlist, symbol];
 
-    set({ currentUser: { ...user, watchlist: updatedWatchlist } });
+    const updatedUser = { ...user, watchlist: updatedWatchlist };
+    try {
+      localStorage.setItem('beststocks_user', JSON.stringify(updatedUser));
+    } catch (e) {
+      // Ignore
+    }
+
+    set({ currentUser: updatedUser });
   },
 
   tickPrices: () => {
@@ -119,7 +149,6 @@ export const useStockStore = create<StockStore>((set, get) => ({
         };
       });
 
-      // Keep detail stock updated if open
       const currentDetail = state.selectedStockForDetail;
       const updatedDetail = currentDetail
         ? updatedStocks.find((s) => s.id === currentDetail.id) || currentDetail
