@@ -34,7 +34,7 @@ export default function StockDetailModal() {
     selectedStockForDetail, 
     setSelectedStockForDetail, 
     criteria, 
-    currentUser, 
+    watchlist, 
     toggleWatchlist,
     lastTickTime
   } = useStockStore();
@@ -46,7 +46,7 @@ export default function StockDetailModal() {
   const stock = selectedStockForDetail;
   const evaluation = evaluateStock(stock, criteria);
   const verdict = evaluation.verdict;
-  const isBookmarked = currentUser?.watchlist.includes(stock.symbol) || false;
+  const isBookmarked = watchlist.includes(stock.symbol);
   const isPositive = stock.change >= 0;
 
   const sparklineData = stock.sparkline.map((price, idx) => ({
@@ -72,7 +72,16 @@ export default function StockDetailModal() {
                 <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
                   {stock.sector}
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold">
+                <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${
+                  verdict.status === 'BEST_FOR_INVESTING'
+                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                    : verdict.status === 'POTENTIAL_MONITOR'
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                    : 'bg-rose-500/20 text-rose-400 border-rose-500/40'
+                }`}>
+                  {verdict.recommendation} ({evaluation.score}/11)
+                </span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-semibold hidden sm:inline">
                   {stock.rating}
                 </span>
               </div>
@@ -234,19 +243,24 @@ export default function StockDetailModal() {
                     )}
                   </div>
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <span
-                        className={`text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+                        className={`text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full border shadow-sm ${
                           verdict.status === 'BEST_FOR_INVESTING'
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                            ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50'
                             : verdict.status === 'POTENTIAL_MONITOR'
-                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                            : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                            ? 'bg-amber-500/25 text-amber-300 border-amber-500/50'
+                            : 'bg-rose-500/25 text-rose-300 border-rose-500/50'
                         }`}
                       >
-                        {verdict.badgeText}
+                        INVESTMENT DECISION: {verdict.recommendation}
                       </span>
-                      <span className="text-xs text-slate-400">Score: {evaluation.score}/11 Passed</span>
+                      <span className="text-xs text-slate-300 font-semibold bg-slate-950/80 px-2.5 py-0.5 rounded-full border border-slate-800">
+                        Score: {evaluation.score}/11 Rules Passed
+                      </span>
+                    </div>
+                    <div className="text-xs font-bold text-slate-300 mb-1">
+                      {verdict.verdictTagline}
                     </div>
                     <h3 className="text-xl font-black text-white">{verdict.title}</h3>
                     <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed max-w-2xl">

@@ -1,4 +1,5 @@
 export type StockIndex =
+  | 'ALL STOCKS'
   | 'NIFTY 50'
   | 'SENSEX'
   | 'NIFTY 100'
@@ -30,6 +31,13 @@ export interface IndexMeta {
   category: IndexCategory;
   description: string;
   countHint: string;
+}
+
+export interface IndexLivePrice {
+  name: StockIndex;
+  currentPrice: number;
+  change: number;
+  changePercent: number;
 }
 
 export interface ScreenerCriteria {
@@ -111,6 +119,8 @@ export type VerdictStatus = 'BEST_FOR_INVESTING' | 'POTENTIAL_MONITOR' | 'NOT_RE
 export interface InvestmentVerdict {
   status: VerdictStatus;
   badgeText: string;
+  recommendation: 'GOOD TO INVEST' | 'MONITOR ONLY' | 'NOT GOOD TO INVEST';
+  verdictTagline: string;
   title: string;
   summary: string;
   keyStrengths: string[];
@@ -128,9 +138,3 @@ export interface EvaluationResult {
   verdict: InvestmentVerdict;
 }
 
-export interface UserProfile {
-  name: string;
-  email: string;
-  avatar: string;
-  watchlist: string[];
-}

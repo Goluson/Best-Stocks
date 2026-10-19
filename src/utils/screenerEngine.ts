@@ -24,8 +24,10 @@ export function determineInvestmentVerdict(
   if (score === totalCriteria) {
     return {
       status: 'BEST_FOR_INVESTING',
-      badgeText: 'BEST FOR INVESTING',
-      title: 'Top-Decile Compounder — Highly Recommended',
+      badgeText: 'GOOD TO INVEST',
+      recommendation: 'GOOD TO INVEST',
+      verdictTagline: '🟢 Excellent Compounder — 11/11 Strict Fundamental Rules Passed',
+      title: 'Top-Decile Compounder — Highly Recommended for Investing',
       summary: `${stock.symbol} satisfies all 11 strict fundamental criteria. It combines strong top-line sales growth (${stock.salesGrowth3to5Yr}%), high ROE (${stock.roe}%), pristine balance sheet (D/E ${stock.debtToEquity}), and positive free cash flows.`,
       keyStrengths: [
         `Outstanding Capital Efficiency: ROIC of ${stock.roic}% generating a +${stock.roicWaccSpread}% EVA spread over WACC.`,
@@ -40,8 +42,10 @@ export function determineInvestmentVerdict(
   } else if (score >= 9) {
     return {
       status: 'POTENTIAL_MONITOR',
-      badgeText: 'GOOD CANDIDATE / MONITOR',
-      title: 'Quality Business with Minor Bottleneck',
+      badgeText: 'MONITOR ONLY',
+      recommendation: 'MONITOR ONLY',
+      verdictTagline: '🟡 Quality Business with Minor Bottleneck — Add to Watchlist Only',
+      title: 'Quality Business with Minor Bottleneck (Monitor for Entry)',
       summary: `${stock.symbol} passed ${score} of 11 conditions. It has solid market standing and capital strength, but missed on: ${failedCriteria.map(f => f.label).join(', ')}.`,
       keyStrengths: [
         `Strong operational franchise with ${stock.roe}% Return on Equity.`,
@@ -54,8 +58,10 @@ export function determineInvestmentVerdict(
   } else {
     return {
       status: 'NOT_RECOMMENDED',
-      badgeText: 'NOT RECOMMENDED FOR VALUE INVESTING',
-      title: 'Fails Core Quality or Solvency Benchmarks',
+      badgeText: 'NOT GOOD TO INVEST',
+      recommendation: 'NOT GOOD TO INVEST',
+      verdictTagline: '🔴 Avoid: High Risk — Fails Core Fundamental Solvency Benchmarks',
+      title: 'Not Recommended for Value Investing (Elevated Risk)',
       summary: `${stock.symbol} failed ${failedCriteria.length} criteria. It currently does not qualify as a "Best Stock" due to elevated leverage, weak cash flow conversion, or sub-par return on invested capital.`,
       keyStrengths: stock.reasonsToInvest.slice(0, 2),
       keyRisks: failedCriteria.slice(0, 3).map(

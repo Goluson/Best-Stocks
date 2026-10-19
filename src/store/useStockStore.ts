@@ -1,7 +1,20 @@
 import { create } from 'zustand';
-import { Stock, StockIndex, ScreenerCriteria, EvaluationResult, UserProfile } from '../types/stock';
+import { Stock, StockIndex, ScreenerCriteria, EvaluationResult, IndexLivePrice } from '../types/stock';
 import { ALL_STOCKS } from '../data/stocksData';
 import { DEFAULT_CRITERIA, evaluateStock } from '../utils/screenerEngine';
+import { resolveOrGenerateStock } from '../utils/universalStockResolver';
+
+export const INITIAL_INDEX_PRICES: IndexLivePrice[] = [
+  { name: 'NIFTY 50', currentPrice: 24852.15, change: 104.25, changePercent: 0.42 },
+  { name: 'SENSEX', currentPrice: 81224.75, change: 308.10, changePercent: 0.38 },
+  { name: 'BANK NIFTY', currentPrice: 51980.20, change: 335.60, changePercent: 0.65 },
+  { name: 'NIFTY AUTO', currentPrice: 25410.30, change: 321.40, changePercent: 1.28 },
+  { name: 'NIFTY IT', currentPrice: 42310.80, change: 468.90, changePercent: 1.12 },
+  { name: 'NIFTY PHARMA', currentPrice: 22145.50, change: 154.20, changePercent: 0.70 },
+  { name: 'NIFTY FMCG', currentPrice: 61280.40, change: -125.10, changePercent: -0.20 },
+  { name: 'NIFTY METAL', currentPrice: 9840.60, change: 86.40, changePercent: 0.89 },
+  { name: 'NIFTY MID CAP SELECT', currentPrice: 13120.30, change: 112.50, changePercent: 0.86 },
+];
 
 interface StockStore {
   stocks: Stock[];
@@ -10,8 +23,8 @@ interface StockStore {
   selectedStockForDetail: Stock | null;
   criteria: ScreenerCriteria;
   isCriteriaDrawerOpen: boolean;
-  isSignInModalOpen: boolean;
-  currentUser: UserProfile | null;
+  watchlist: string[];
+  indexPrices: IndexLivePrice[];
   marketStatus: 'OPEN' | 'CLOSED';
   lastTickTime: string;
 
@@ -22,11 +35,9 @@ interface StockStore {
   updateCriteria: (newCriteria: Partial<ScreenerCriteria>) => void;
   resetCriteria: () => void;
   toggleCriteriaDrawer: () => void;
-  setIsSignInModalOpen: (isOpen: boolean) => void;
-  signIn: (email: string, name?: string) => void;
-  signOut: () => void;
   toggleWatchlist: (symbol: string) => void;
   tickPrices: () => void;
+  analyzeAnyStock: (query: string) => Stock;
 
   // Computed helper
   getEvaluationsForIndex: (index?: StockIndex) => {
@@ -36,26 +47,26 @@ interface StockStore {
   };
 }
 
-// Load initial user from localStorage if exists
-function getInitialUser(): UserProfile | null {
+// Load initial watchlist from localStorage if exists
+function getInitialWatchlist(): string[] {
   try {
-    const saved = localStorage.getItem('beststocks_user');
+    const saved = localStorage.getItem('beststocks_watchlist');
     if (saved) return JSON.parse(saved);
   } catch (e) {
     // Ignore localStorage access errors
   }
-  return null;
+  return ['TCS', 'TITAN', 'POLYCAB'];
 }
 
 export const useStockStore = create<StockStore>((set, get) => ({
   stocks: ALL_STOCKS,
-  selectedIndex: 'NIFTY 50',
+  selectedIndex: 'ALL STOCKS',
   searchQuery: '',
   selectedStockForDetail: null,
   criteria: DEFAULT_CRITERIA,
   isCriteriaDrawerOpen: false,
-  isSignInModalOpen: false,
-  currentUser: getInitialUser(),
+  watchlist: getInitialWatchlist(),
+  indexPrices: INITIAL_INDEX_PRICES,
   marketStatus: 'OPEN',
   lastTickTime: new Date().toLocaleTimeString(),
 
@@ -71,58 +82,42 @@ export const useStockStore = create<StockStore>((set, get) => ({
   toggleCriteriaDrawer: () =>
     set((state) => ({ isCriteriaDrawerOpen: !state.isCriteriaDrawerOpen })),
 
-  setIsSignInModalOpen: (isOpen) => set({ isSignInModalOpen: isOpen }),
+  toggleWatchlist: (symbol) => {
+    set((state) => {
+      const exists = state.watchlist.includes(symbol);
+      const updatedWatchlist = exists
+        ? state.watchlist.filter((s) => s !== symbol)
+        : [...state.watchlist, symbol];
 
-  signIn: (email, name) => {
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanName = name?.trim() || cleanEmail.split('@')[0];
-    const newUser: UserProfile = {
-      name: cleanName.charAt(0).toUpperCase() + cleanName.slice(1),
-      email: cleanEmail,
-      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(cleanName)}&backgroundColor=0284c7,059669,7c3aed`,
-      watchlist: ['TCS', 'TITAN', 'POLYCAB'],
-    };
+      try {
+        localStorage.setItem('beststocks_watchlist', JSON.stringify(updatedWatchlist));
+      } catch (e) {
+        // Ignore
+      }
 
-    try {
-      localStorage.setItem('beststocks_user', JSON.stringify(newUser));
-    } catch (e) {
-      // Ignore localStorage access errors
-    }
-
-    set({
-      currentUser: newUser,
-      isSignInModalOpen: false,
+      return { watchlist: updatedWatchlist };
     });
   },
 
-  signOut: () => {
-    try {
-      localStorage.removeItem('beststocks_user');
-    } catch (e) {
-      // Ignore
-    }
-    set({ currentUser: null });
-  },
+  analyzeAnyStock: (query: string) => {
+    const currentStocks = get().stocks;
+    const resolvedStock = resolveOrGenerateStock(query, currentStocks);
 
-  toggleWatchlist: (symbol) => {
-    const user = get().currentUser;
-    if (!user) {
-      set({ isSignInModalOpen: true });
-      return;
-    }
-    const exists = user.watchlist.includes(symbol);
-    const updatedWatchlist = exists
-      ? user.watchlist.filter((s) => s !== symbol)
-      : [...user.watchlist, symbol];
-
-    const updatedUser = { ...user, watchlist: updatedWatchlist };
-    try {
-      localStorage.setItem('beststocks_user', JSON.stringify(updatedUser));
-    } catch (e) {
-      // Ignore
+    const exists = currentStocks.some((s) => s.id === resolvedStock.id || s.symbol.toUpperCase() === resolvedStock.symbol.toUpperCase());
+    if (!exists) {
+      set((state) => ({
+        stocks: [resolvedStock, ...state.stocks],
+        selectedStockForDetail: resolvedStock,
+        searchQuery: '',
+      }));
+    } else {
+      set({
+        selectedStockForDetail: resolvedStock,
+        searchQuery: '',
+      });
     }
 
-    set({ currentUser: updatedUser });
+    return resolvedStock;
   },
 
   tickPrices: () => {
@@ -149,6 +144,21 @@ export const useStockStore = create<StockStore>((set, get) => ({
         };
       });
 
+      const updatedIndexPrices = state.indexPrices.map((idx) => {
+        // 50% chance of price tick per index
+        if (Math.random() > 0.5) return idx;
+        const deltaPct = (Math.random() - 0.49) * 0.003;
+        const newPrice = Math.round((idx.currentPrice * (1 + deltaPct)) * 100) / 100;
+        const newChange = Math.round((idx.change + (newPrice - idx.currentPrice)) * 100) / 100;
+        const newChangePct = Math.round(((newChange / (newPrice - newChange)) * 100) * 100) / 100;
+        return {
+          ...idx,
+          currentPrice: newPrice,
+          change: newChange,
+          changePercent: newChangePct,
+        };
+      });
+
       const currentDetail = state.selectedStockForDetail;
       const updatedDetail = currentDetail
         ? updatedStocks.find((s) => s.id === currentDetail.id) || currentDetail
@@ -156,6 +166,7 @@ export const useStockStore = create<StockStore>((set, get) => ({
 
       return {
         stocks: updatedStocks,
+        indexPrices: updatedIndexPrices,
         selectedStockForDetail: updatedDetail,
         lastTickTime: new Date().toLocaleTimeString(),
       };
@@ -166,9 +177,9 @@ export const useStockStore = create<StockStore>((set, get) => ({
     const state = get();
     const indexToUse = targetIndex || state.selectedIndex;
     
-    // Filter stocks belonging to index
+    // Filter stocks belonging to index (or all Indian stocks)
     const indexStocks = state.stocks.filter((stock) =>
-      indexToUse === 'ALL NIFTY' ? true : stock.indices.includes(indexToUse)
+      indexToUse === 'ALL STOCKS' || indexToUse === 'ALL NIFTY' ? true : stock.indices.includes(indexToUse)
     );
 
     const evaluated = indexStocks.map((stock) => evaluateStock(stock, state.criteria));

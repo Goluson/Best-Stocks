@@ -28,18 +28,18 @@ Organized into clean, uncluttered categories:
 10. **Interest Coverage Ratio**: `> 5x`
 11. **3-Year Revenue CAGR**: `> 10%`
 
-### 3. Investment Verdict & Analysis on Any Listed Stock
-- Search across all listed Indian stocks in the top navbar.
-- Real-time live prices with instant quality badges in autocomplete.
-- Click any stock to open the **AI & Fundamental Investment Verdict**:
-  - 🟢 **BEST FOR INVESTING**: 11/11 criteria met, high compounding quality.
-  - 🟡 **GOOD CANDIDATE / MONITOR**: 9–10 criteria met, highlighting specific bottlenecks.
-  - 🔴 **NOT RECOMMENDED**: Fails core solvency or profitability benchmarks.
-  - Detailed breakdown of **Key Strengths**, **Risks**, **11-Point Scorecard Table**, and **5-Year Revenue & FCF Charts**.
+### 3. Investment Verdict & Analysis on ANY Listed Indian Stock
+- Search across **all listed Indian stocks on NSE & BSE** directly in the top navbar (e.g., Reliance, HDFC Bank, TCS, Zomato, Suzlon, Trent, Tata Motors, HAL, Mazagon Dock, etc.).
+- **Universal On-Demand Indian Stock Analyzer**: If you search for any custom Indian company or ticker, the system computes an institutional-grade 11-rule fundamental evaluation on the fly.
+- Real-time live prices with instant, unambiguous investing recommendation badges:
+  - 🟢 **GOOD TO INVEST (11/11)**: Satisfies all 11 strict fundamental criteria — Top-decile compounder.
+  - 🟡 **MONITOR ONLY (9–10/11)**: Solid business with minor leverage or valuation bottleneck.
+  - 🔴 **NOT GOOD TO INVEST / AVOID (<9/11)**: Fails core solvency, cash flow, or return on capital tests.
+- Comprehensive breakdown of **Investment Decision Banner**, **Key Strengths**, **Key Risks**, **11-Rule Scorecard Table (Target vs. Actual)**, and **5-Year Revenue & FCF Charts**.
 
-### 4. Simple Sign In & Watchlist
-- One-click Guest/Demo Investor login or email login.
-- Persistent watchlist tracking.
+### 4. Instant Watchlist Tracking
+- Instant bookmarking of promising companies directly to your browser watchlist.
+- Persistent local storage with no sign-in or authentication barrier required.
 
 ---
 

@@ -4,7 +4,6 @@ import IndexBar from './components/layout/IndexBar';
 import CriteriaPanel from './components/screener/CriteriaPanel';
 import ScreenerResults from './components/screener/ScreenerResults';
 import StockDetailModal from './components/screener/StockDetailModal';
-import SignInModal from './components/auth/SignInModal';
 import { useStockStore } from './store/useStockStore';
 
 export default function App() {
@@ -20,7 +19,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950">
-      {/* 1. Top Navbar: Global Stock Search & Live Price + Sign In */}
+      {/* 1. Top Navbar: Global Stock Search & Live Price + Watchlist */}
       <Navbar />
 
       {/* 2. Sub-Navbar: Find Best Stocks & Indices Selector */}
@@ -36,9 +35,6 @@ export default function App() {
 
       {/* 5. Live Stock Price & Financial Analysis Modal (Triggered by Search or Card Click) */}
       <StockDetailModal />
-
-      {/* 6. Simple Sign In Modal */}
-      <SignInModal />
 
       {/* Footer */}
       <footer className="bg-slate-950 border-t border-slate-900 py-6 text-center text-xs text-slate-500">

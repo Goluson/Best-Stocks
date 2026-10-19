@@ -1,4 +1,5 @@
 import { Stock, IndexMeta } from '../types/stock';
+import { EXPANDED_INDIAN_STOCKS } from './expandedStocks';
 
 export const ALL_INDICES_META: IndexMeta[] = [
   // Broad Market
@@ -32,7 +33,7 @@ export const ALL_INDICES_META: IndexMeta[] = [
   { name: 'BSE SMALL CAP', category: 'Mid & Small Cap', description: 'High-conviction small-cap growth champions on BSE', countHint: '250 Stocks' },
 ];
 
-export const ALL_STOCKS: Stock[] = [
+const BASE_STOCKS: Stock[] = [
   // 1. TCS
   {
     id: 'tcs',
@@ -1124,3 +1125,11 @@ export const ALL_STOCKS: Stock[] = [
     rating: 'Buy',
   },
 ];
+
+const rawCombined = [...BASE_STOCKS, ...EXPANDED_INDIAN_STOCKS];
+const seenSymbols = new Set<string>();
+export const ALL_STOCKS: Stock[] = rawCombined.filter((s) => {
+  if (seenSymbols.has(s.symbol)) return false;
+  seenSymbols.add(s.symbol);
+  return true;
+});

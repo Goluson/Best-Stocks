@@ -20,9 +20,9 @@ interface StockCardProps {
 
 export default function StockCard({ evaluation, onSelect }: StockCardProps) {
   const { stock, score, totalCriteria, meetsAll, criteriaResults, verdict } = evaluation;
-  const { currentUser, toggleWatchlist } = useStockStore();
+  const { watchlist, toggleWatchlist } = useStockStore();
 
-  const isBookmarked = currentUser?.watchlist.includes(stock.symbol) || false;
+  const isBookmarked = watchlist.includes(stock.symbol);
   const isPositive = stock.change >= 0;
 
   return (

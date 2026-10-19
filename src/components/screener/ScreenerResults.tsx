@@ -49,9 +49,6 @@ export default function ScreenerResults() {
                   Best Stocks in <span className="text-emerald-400">{selectedIndex}</span>
                 </h2>
               </div>
-              <p className="text-xs text-slate-400 mt-1">
-                Displaying stocks that <strong className="text-emerald-300 font-semibold">100% fulfill all 11 conditions</strong> (Sales Growth, ROE, FCF, ROIC, PEG, D/E, etc.)
-              </p>
             </div>
 
             <div className="flex items-center gap-2">
